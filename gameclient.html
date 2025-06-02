@@ -7,13 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* HSBC Inspired Colors */
+        :root {
+            --hsbc-red: #DB0011; /* HSBC's primary red */
+            --hsbc-black: #000000;
+            --hsbc-dark-gray: #333333;
+            --hsbc-light-gray: #F0F0F0; /* Light background */
+            --hsbc-medium-gray: #CCCCCC; /* Borders */
+            --hsbc-white: #FFFFFF;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            color: #1f2937; /* Gray-800 */
+            background-color: var(--hsbc-light-gray);
+            color: var(--hsbc-dark-gray);
         }
         .container-wrapper {
-            max-width: 1200px; /* Wider container for game + dashboard */
+            max-width: 1200px;
             margin: 2rem auto;
             padding: 1rem;
             display: flex;
@@ -26,26 +36,28 @@
             }
         }
         .game-container {
-            flex-grow: 1; /* Game takes available space */
-            max-width: 700px; /* Max width for game content itself */
-            margin: 0 auto; /* Center game content if space is larger */
+            flex-grow: 1;
+            max-width: 700px;
+            margin: 0 auto;
             padding: 2rem;
-            background-color: white;
+            background-color: var(--hsbc-white);
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--hsbc-medium-gray);
         }
         .dashboard-container {
-            width: 100%; /* Full width on mobile */
-            max-width: 700px; /* Consistent max-width with game on mobile */
-            margin: 0 auto; /* Center on mobile */
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
             padding: 1.5rem;
-            background-color: #ffffff;
+            background-color: var(--hsbc-white);
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid var(--hsbc-medium-gray);
         }
         @media (min-width: 1024px) { /* lg breakpoint */
             .dashboard-container {
-                width: 350px; /* Fixed width for dashboard on larger screens */
+                width: 350px;
                 min-width: 300px;
                 max-width: none;
                 margin: 0;
@@ -59,99 +71,117 @@
             transition: all 0.3s ease;
             cursor: pointer;
             text-align: center;
+            border: 1px solid transparent;
         }
         .btn-primary {
-            background-color: #3b82f6; color: white;
+            background-color: var(--hsbc-red);
+            color: var(--hsbc-white);
+            border-color: var(--hsbc-red);
         }
         .btn-primary:hover {
-            background-color: #2563eb;
+            background-color: #A8000D; /* Darker HSBC red */
+            border-color: #A8000D;
         }
         .option-btn {
             display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem; border: 1px solid #d1d5db; border-radius: 8px;
-            background-color: #f9fafb;
+            margin-bottom: 0.5rem; border: 1px solid var(--hsbc-medium-gray); border-radius: 8px;
+            background-color: var(--hsbc-light-gray);
+            color: var(--hsbc-dark-gray);
         }
         .option-btn:hover {
-            background-color: #eff6ff; border-color: #93c5fd;
+            background-color: #e0e0e0; /* Slightly darker light gray */
+            border-color: var(--hsbc-dark-gray);
         }
         .option-btn.selected {
-            background-color: #bfdbfe; border-color: #3b82f6; font-weight: 500;
+            background-color: var(--hsbc-red);
+            border-color: var(--hsbc-red);
+            color: var(--hsbc-white);
+            font-weight: 500;
         }
         .feedback-modal, .name-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.6); display: flex; align-items: center;
+            background-color: rgba(0,0,0,0.7); display: flex; align-items: center;
             justify-content: center; z-index: 1000; padding: 1rem;
         }
         .feedback-content, .name-content {
-            background-color: white; padding: 2rem; border-radius: 12px;
+            background-color: var(--hsbc-white); padding: 2rem; border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center;
             max-width: 500px; width: 90%;
+            color: var(--hsbc-dark-gray);
         }
         .progress-bar-container {
-            width: 100%; background-color: #e5e7eb; border-radius: 9999px;
+            width: 100%; background-color: var(--hsbc-medium-gray); border-radius: 9999px;
             height: 10px; margin-bottom: 1rem;
         }
         .progress-bar {
-            height: 100%; background-color: #3b82f6; border-radius: 9999px;
+            height: 100%; background-color: var(--hsbc-red); border-radius: 9999px;
             transition: width 0.3s ease-in-out;
         }
         .fill-in-input, .name-input {
-            width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db;
+            width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--hsbc-medium-gray);
             border-radius: 8px; margin-bottom: 1rem; font-size: 1rem;
+            color: var(--hsbc-dark-gray); background-color: var(--hsbc-white);
         }
         .checkbox-label {
             display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem;
-            border: 1px solid #d1d5db; border-radius: 8px; background-color: #f9fafb; cursor: pointer;
+            border: 1px solid var(--hsbc-medium-gray); border-radius: 8px; background-color: var(--hsbc-light-gray); cursor: pointer;
+            color: var(--hsbc-dark-gray);
         }
-        .checkbox-label:hover { background-color: #eff6ff; }
+        .checkbox-label:hover { background-color: #e0e0e0; }
         .checkbox-label input[type="checkbox"] {
-            margin-right: 0.75rem; width: 1.25rem; height: 1.25rem; accent-color: #3b82f6;
+            margin-right: 0.75rem; width: 1.25rem; height: 1.25rem; accent-color: var(--hsbc-red);
         }
         .dashboard-title {
-            font-size: 1.5rem; /* text-2xl */
-            font-weight: 700; /* font-bold */
-            color: #1f2937; /* text-gray-800 */
-            margin-bottom: 1rem; /* mb-4 */
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--hsbc-dark-gray);
+            margin-bottom: 1rem;
             text-align: center;
         }
         .player-entry {
-            background-color: #f9fafb; /* gray-50 */
-            padding: 0.75rem 1rem; /* p-3 */
-            border-radius: 8px; /* rounded-lg */
-            margin-bottom: 0.5rem; /* mb-2 */
-            border: 1px solid #e5e7eb; /* border-gray-200 */
+            background-color: var(--hsbc-light-gray);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--hsbc-medium-gray);
         }
         .player-name {
-            font-weight: 600; /* font-semibold */
-            color: #374151; /* text-gray-700 */
+            font-weight: 600;
+            color: var(--hsbc-dark-gray);
         }
         .player-score, .player-progress {
-            font-size: 0.875rem; /* text-sm */
-            color: #4b5563; /* text-gray-600 */
+            font-size: 0.875rem;
+            color: #555555; /* Slightly lighter dark gray */
+        }
+        .player-entry.current-player { /* Class for highlighting current player */
+             border-color: var(--hsbc-red);
+             background-color: #ffe5e8; /* Very light red tint */
         }
         .loading-indicator {
             text-align: center;
             padding: 1rem;
             font-style: italic;
-            color: #6b7280; /* Gray-500 */
+            color: #555555;
         }
-        .message-box { /* For replacing alerts */
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ef4444; /* red-500 for errors, can be changed for success */
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
+        .message-box {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background-color: var(--hsbc-red); /* Default to red for errors */
+            color: var(--hsbc-white);
+            padding: 1rem 1.5rem; border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 2000;
-            font-size: 0.875rem;
-            display: none; /* Hidden by default */
+            z-index: 2000; font-size: 0.875rem; display: none;
         }
         .message-box.success {
-             background-color: #22c55e; /* green-500 */
+             background-color: #008452; /* A suitable green for success messages */
         }
+        /* Text color adjustments */
+        h1, h2, h3 { color: var(--hsbc-dark-gray); }
+        p { color: var(--hsbc-dark-gray); }
+        #scoreDisplay { color: var(--hsbc-red); }
+        #finalScore { color: var(--hsbc-red); }
+        .feedback-content .text-green-600 { color: #008452 !important; } /* Override Tailwind green */
+        .feedback-content .text-red-600 { color: var(--hsbc-red) !important; } /* Override Tailwind red */
+
     </style>
 </head>
 <body>
@@ -161,7 +191,7 @@
         <div id="gameArea" class="game-container">
             <div id="nameModal" class="name-modal">
                 <div class="name-content">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome, Challenger!</h2>
+                    <h2 class="text-2xl font-bold mb-4">Welcome, Challenger!</h2>
                     <p class="text-gray-600 mb-4">Please enter your name to join the game:</p>
                     <input type="text" id="playerNameInput" class="name-input" placeholder="Your Name">
                     <button id="submitNameButton" class="btn btn-primary w-full">Join Game</button>
@@ -170,9 +200,9 @@
             </div>
 
             <div id="startScreen" class="hidden">
-                <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Data Governance Challenge!</h1>
-                <p class="text-gray-600 mb-2 text-center">Player: <span id="currentPlayerNameDisplay" class="font-semibold"></span></p>
-                <p class="text-gray-600 mb-6 text-center">
+                <h1 class="text-3xl font-bold text-center mb-4">Data Governance Challenge!</h1>
+                <p class="mb-2 text-center">Player: <span id="currentPlayerNameDisplay" class="font-semibold"></span></p>
+                <p class="mb-6 text-center">
                     Data Governance is about managing your data assets. Test your knowledge!
                 </p>
                 <button id="startButton" class="btn btn-primary w-full">Start Game</button>
@@ -181,25 +211,26 @@
             <div id="gameScreen" class="hidden">
                 <div class="flex justify-between items-center mb-4">
                     <p id="questionCounter" class="text-sm text-gray-500">Question 1 of 10</p>
-                    <p id="scoreDisplay" class="text-lg font-semibold text-blue-600">Score: 0</p>
+                    <p id="scoreDisplay" class="text-lg font-semibold">Score: 0</p>
                 </div>
                 <div class="progress-bar-container">
                     <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
                 </div>
-                <h2 id="questionText" class="text-xl font-semibold text-gray-700 mb-6">Question text will go here.</h2>
+                <h2 id="questionText" class="text-xl font-semibold mb-6">Question text will go here.</h2>
                 <div id="optionsContainer" class="mb-6"></div>
                 <button id="submitButton" class="btn btn-primary w-full">Submit Answer</button>
             </div>
 
             <div id="endScreen" class="hidden text-center">
-                <h1 class="text-3xl font-bold text-gray-800 mb-4">Game Over!</h1>
-                <p id="finalScore" class="text-2xl text-blue-600 mb-2">Your final score is: 0</p>
-                <p id="summaryMessage" class="text-gray-600 mb-6">Great effort!</p>
+                <h1 class="text-3xl font-bold mb-4">Game Over!</h1>
+                <p id="finalScore" class="text-2xl mb-2">Your final score is: 0</p>
+                <p id="summaryMessage" class="mb-6">Great effort!</p>
                 <button id="restartButton" class="btn btn-primary w-full">Play Again</button>
             </div>
         </div>
 
-        <div id="dashboardArea" class="dashboard-container hidden"> <h2 class="dashboard-title">Live Dashboard</h2>
+        <div id="dashboardArea" class="dashboard-container hidden">
+            <h2 class="dashboard-title">Live Dashboard</h2>
             <div id="playerList" class="space-y-2">
                 <p class="loading-indicator">Loading player data...</p>
             </div>
@@ -210,12 +241,12 @@
     <div id="feedbackModal" class="feedback-modal hidden">
         <div class="feedback-content">
             <h3 id="feedbackTitle" class="text-2xl font-bold mb-3">Correct!</h3>
-            <p id="feedbackText" class="text-gray-700 mb-4">Explanation goes here.</p>
+            <p id="feedbackText" class="mb-4">Explanation goes here.</p>
             <button id="nextQuestionButton" class="btn btn-primary w-1/2">Next Question</button>
         </div>
     </div>
 
-    <script> // Changed to regular script tag as type="module" is not strictly needed without JS imports
+    <script>
         // --- CONFIGURATION ---
         const FLASK_SERVER_URL = 'http://localhost:5000'; // Replace with your Flask server's URL
         const DASHBOARD_REFRESH_INTERVAL = 3000; // milliseconds (e.g., 3 seconds)
@@ -266,8 +297,8 @@
         const messageBox = document.getElementById('messageBox');
 
         // Game state variables
-        let currentPlayerId = null; // Will be set by the server upon registration
-        let currentPlayerName = "Player"; // Default
+        let currentPlayerId = null;
+        let currentPlayerName = "Player";
         let currentQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
@@ -291,10 +322,10 @@
                     throw new Error(errorData.detail || `Server error: ${response.status}`);
                 }
                 const data = await response.json();
-                currentPlayerId = data.player_id; // Assuming server returns player_id
-                currentPlayerName = name; // Use the name submitted
+                currentPlayerId = data.player_id;
+                currentPlayerName = name;
                 
-                serverStatusDisplay.textContent = `Registered as ${currentPlayerName} (ID: ${currentPlayerId.substring(0,6)}...)`;
+                serverStatusDisplay.textContent = `Registered as ${currentPlayerName} (ID: ${currentPlayerId ? currentPlayerId.substring(0,6) : 'N/A'}...)`;
                 showCustomAlert(data.message || "Registered successfully!", true);
                 return true;
             } catch (error) {
@@ -307,12 +338,12 @@
         }
 
         async function updatePlayerStatus(statusData) {
-            if (!currentPlayerId) return; // Not registered
+            if (!currentPlayerId) return;
             try {
                 const payload = {
                     player_id: currentPlayerId,
-                    name: currentPlayerName, // Send name along for server convenience
-                    ...statusData // score, currentQuestionNumber, totalQuestionsInGame, status
+                    name: currentPlayerName,
+                    ...statusData
                 };
                 const response = await fetch(`${FLASK_SERVER_URL}/update_status`, {
                     method: 'POST',
@@ -323,8 +354,6 @@
                      const errorData = await response.json().catch(() => ({ detail: "Unknown server error updating status." }));
                     throw new Error(errorData.detail || `Server error: ${response.status}`);
                 }
-                // const data = await response.json(); // Optional: process success message
-                // console.log("Status update response:", data.message);
             } catch (error) {
                 console.error("Error updating player status:", error);
                 showCustomAlert(`Error updating status: ${error.message}`);
@@ -342,22 +371,22 @@
                 renderDashboard(players);
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
-                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500">Error loading dashboard. Is server running?</p>';
+                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500" style="color: var(--hsbc-red);">Error loading dashboard. Is server running?</p>';
             }
         }
 
         function renderDashboard(players) {
             if (!Array.isArray(players)) {
-                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500">Invalid dashboard data received.</p>';
+                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500" style="color: var(--hsbc-red);">Invalid dashboard data received.</p>';
                 return;
             }
             if (players.length === 0) {
                 playerListDiv.innerHTML = '<p class="loading-indicator">No active players yet. Be the first!</p>';
                 return;
             }
-            playerListDiv.innerHTML = ''; // Clear previous entries
+            playerListDiv.innerHTML = '';
 
-            players.sort((a, b) => { // Sort by score (desc), then by name (asc)
+            players.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
                 return (a.name || "").localeCompare(b.name || "");
             });
@@ -366,7 +395,7 @@
                 const playerEntry = document.createElement('div');
                 playerEntry.classList.add('player-entry');
                 if (player.player_id === currentPlayerId) {
-                    playerEntry.classList.add('border-blue-500', 'bg-blue-50');
+                    playerEntry.classList.add('current-player'); // Use custom class for HSBC style highlight
                 }
 
                 let progressText = "";
@@ -405,29 +434,23 @@
                 currentPlayerNameDisplay.textContent = currentPlayerName;
                 playerIdDisplay.textContent = currentPlayerId ? currentPlayerId.substring(0,8)+'...' : 'N/A';
 
-                // Initial status update for "waiting"
                 updatePlayerStatus({
                     score: 0,
                     current_question_number: 0,
                     total_questions_in_game: 0,
                     status: "waiting"
                 });
-                fetchDashboardData(); // Initial fetch
-                if (dashboardIntervalId) clearInterval(dashboardIntervalId); // Clear existing interval if any
+                fetchDashboardData();
+                if (dashboardIntervalId) clearInterval(dashboardIntervalId);
                 dashboardIntervalId = setInterval(fetchDashboardData, DASHBOARD_REFRESH_INTERVAL);
             }
         }
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+        // REMOVED: function shuffleArray(array) { ... }
 
         function startGame() {
             gameInProgress = true;
-            shuffleArray(questionBank);
+            // REMOVED: shuffleArray(questionBank);
             currentQuestions = questionBank.slice(0, Math.min(MAX_QUESTIONS_PER_GAME, questionBank.length));
             
             if (currentQuestions.length === 0) {
@@ -540,42 +563,40 @@
             if (isCorrect) {
                 score++;
                 feedbackTitle.textContent = "Correct!";
-                feedbackTitle.className = 'text-2xl font-bold mb-3 text-green-600';
+                feedbackTitle.className = 'text-2xl font-bold mb-3 text-green-600'; // This will be overridden by CSS
             } else {
                 feedbackTitle.textContent = "Incorrect!";
-                feedbackTitle.className = 'text-2xl font-bold mb-3 text-red-600';
+                feedbackTitle.className = 'text-2xl font-bold mb-3 text-red-600'; // This will be overridden by CSS
             }
             updateScoreDisplay();
             feedbackText.textContent = questionData.explanation;
             feedbackModal.classList.remove('hidden');
 
             let statusUpdate = "playing";
-            let nextQNum = currentQuestionIndex + 1; // current question (0-indexed) + 1 for 1-indexed display
-            if (nextQNum >= currentQuestions.length) { // If this was the last question
+            let nextQNum = currentQuestionIndex + 1;
+            if (nextQNum >= currentQuestions.length) {
                  statusUpdate = "finished";
             }
 
             updatePlayerStatus({
                 score: score,
-                current_question_number: nextQNum, // Send the number of the question just answered
+                current_question_number: nextQNum,
                 status: statusUpdate,
-                total_questions_in_game: currentQuestions.length // ensure this is always sent
+                total_questions_in_game: currentQuestions.length
             });
         }
 
         function handleNextQuestion() {
-            currentQuestionIndex++; // Move to the next question index
+            currentQuestionIndex++;
             feedbackModal.classList.add('hidden');
             const progressPercentage = ((currentQuestionIndex) / currentQuestions.length) * 100;
             progressBar.style.width = `${progressPercentage}%`;
-            loadQuestion(); // This will call endGame if no more questions
+            loadQuestion();
 
-            // Update status for the question we are *about to load*
-            // This might be redundant if handleSubmit already covers it, but ensures progress is shown
             if (currentQuestionIndex < currentQuestions.length) {
                  updatePlayerStatus({
                     score: score,
-                    current_question_number: currentQuestionIndex + 1, // Next question to be played
+                    current_question_number: currentQuestionIndex + 1,
                     status: "playing",
                     total_questions_in_game: currentQuestions.length
                 });
@@ -603,7 +624,7 @@
 
             updatePlayerStatus({
                 score: score,
-                current_question_number: currentQuestions.length, // All questions answered
+                current_question_number: currentQuestions.length,
                 status: "finished",
                 total_questions_in_game: currentQuestions.length
             });
@@ -611,7 +632,7 @@
         
         function showCustomAlert(message, isSuccess = false, duration = 3000) {
             messageBox.textContent = message;
-            messageBox.classList.remove('success'); // Remove first
+            messageBox.classList.remove('success');
             if(isSuccess) {
                 messageBox.classList.add('success');
             }
@@ -633,20 +654,18 @@
         nextQuestionButton.addEventListener('click', handleNextQuestion);
         restartButton.addEventListener('click', () => {
             endScreen.classList.add('hidden');
-            startScreen.classList.remove('hidden'); // Go back to start screen
-            // Player status in server should reflect they are waiting to start a new game
+            startScreen.classList.remove('hidden');
             updatePlayerStatus({
                 score: 0,
                 current_question_number: 0,
-                total_questions_in_game: 0, // Will be set when game starts
+                total_questions_in_game: 0,
                 status: "waiting"
             });
         });
         
-        // Initial check for server (optional, can be removed if not needed)
         async function checkServerStatus() {
             try {
-                const response = await fetch(`${FLASK_SERVER_URL}/dashboard`); // or a dedicated /health endpoint
+                const response = await fetch(`${FLASK_SERVER_URL}/dashboard`);
                 if (response.ok) {
                     serverStatusDisplay.textContent = "Connected to server. Enter your name.";
                     submitNameButton.disabled = false;
@@ -663,19 +682,12 @@
             }
         }
 
-        // Run initial server check when the page loads
         window.addEventListener('load', checkServerStatus);
 
-        // Cleanup dashboard polling when user leaves (optional, server should handle stale data)
         window.addEventListener('beforeunload', () => {
             if (dashboardIntervalId) {
                 clearInterval(dashboardIntervalId);
             }
-            // Optionally, try to notify the server the player is leaving
-            // This is not guaranteed to work, especially for tab closes.
-            // if (currentPlayerId) {
-            //     navigator.sendBeacon(`${FLASK_SERVER_URL}/leave`, JSON.stringify({ player_id: currentPlayerId }));
-            // }
         });
 
     </script>
