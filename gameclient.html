@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Governance Challenge - Multiplayer (Flask)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1f2937; /* Gray-800 */
+        }
+        .container-wrapper {
+            max-width: 1200px; /* Wider container for game + dashboard */
+            margin: 2rem auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .container-wrapper {
+                flex-direction: row;
+            }
+        }
+        .game-container {
+            flex-grow: 1; /* Game takes available space */
+            max-width: 700px; /* Max width for game content itself */
+            margin: 0 auto; /* Center game content if space is larger */
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-container {
+            width: 100%; /* Full width on mobile */
+            max-width: 700px; /* Consistent max-width with game on mobile */
+            margin: 0 auto; /* Center on mobile */
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .dashboard-container {
+                width: 350px; /* Fixed width for dashboard on larger screens */
+                min-width: 300px;
+                max-width: none;
+                margin: 0;
+            }
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: #3b82f6; color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .option-btn {
+            display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem; border: 1px solid #d1d5db; border-radius: 8px;
+            background-color: #f9fafb;
+        }
+        .option-btn:hover {
+            background-color: #eff6ff; border-color: #93c5fd;
+        }
+        .option-btn.selected {
+            background-color: #bfdbfe; border-color: #3b82f6; font-weight: 500;
+        }
+        .feedback-modal, .name-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6); display: flex; align-items: center;
+            justify-content: center; z-index: 1000; padding: 1rem;
+        }
+        .feedback-content, .name-content {
+            background-color: white; padding: 2rem; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center;
+            max-width: 500px; width: 90%;
+        }
+        .progress-bar-container {
+            width: 100%; background-color: #e5e7eb; border-radius: 9999px;
+            height: 10px; margin-bottom: 1rem;
+        }
+        .progress-bar {
+            height: 100%; background-color: #3b82f6; border-radius: 9999px;
+            transition: width 0.3s ease-in-out;
+        }
+        .fill-in-input, .name-input {
+            width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db;
+            border-radius: 8px; margin-bottom: 1rem; font-size: 1rem;
+        }
+        .checkbox-label {
+            display: flex; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+            border: 1px solid #d1d5db; border-radius: 8px; background-color: #f9fafb; cursor: pointer;
+        }
+        .checkbox-label:hover { background-color: #eff6ff; }
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.75rem; width: 1.25rem; height: 1.25rem; accent-color: #3b82f6;
+        }
+        .dashboard-title {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700; /* font-bold */
+            color: #1f2937; /* text-gray-800 */
+            margin-bottom: 1rem; /* mb-4 */
+            text-align: center;
+        }
+        .player-entry {
+            background-color: #f9fafb; /* gray-50 */
+            padding: 0.75rem 1rem; /* p-3 */
+            border-radius: 8px; /* rounded-lg */
+            margin-bottom: 0.5rem; /* mb-2 */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+        }
+        .player-name {
+            font-weight: 600; /* font-semibold */
+            color: #374151; /* text-gray-700 */
+        }
+        .player-score, .player-progress {
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* text-gray-600 */
+        }
+        .loading-indicator {
+            text-align: center;
+            padding: 1rem;
+            font-style: italic;
+            color: #6b7280; /* Gray-500 */
+        }
+        .message-box { /* For replacing alerts */
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ef4444; /* red-500 for errors, can be changed for success */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 2000;
+            font-size: 0.875rem;
+            display: none; /* Hidden by default */
+        }
+        .message-box.success {
+             background-color: #22c55e; /* green-500 */
+        }
+    </style>
+</head>
+<body>
+    <div id="messageBox" class="message-box"></div>
+
+    <div class="container-wrapper">
+        <div id="gameArea" class="game-container">
+            <div id="nameModal" class="name-modal">
+                <div class="name-content">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome, Challenger!</h2>
+                    <p class="text-gray-600 mb-4">Please enter your name to join the game:</p>
+                    <input type="text" id="playerNameInput" class="name-input" placeholder="Your Name">
+                    <button id="submitNameButton" class="btn btn-primary w-full">Join Game</button>
+                    <p id="serverStatus" class="text-xs text-gray-500 mt-2">Connecting to server...</p>
+                </div>
+            </div>
+
+            <div id="startScreen" class="hidden">
+                <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Data Governance Challenge!</h1>
+                <p class="text-gray-600 mb-2 text-center">Player: <span id="currentPlayerNameDisplay" class="font-semibold"></span></p>
+                <p class="text-gray-600 mb-6 text-center">
+                    Data Governance is about managing your data assets. Test your knowledge!
+                </p>
+                <button id="startButton" class="btn btn-primary w-full">Start Game</button>
+            </div>
+
+            <div id="gameScreen" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <p id="questionCounter" class="text-sm text-gray-500">Question 1 of 10</p>
+                    <p id="scoreDisplay" class="text-lg font-semibold text-blue-600">Score: 0</p>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
+                </div>
+                <h2 id="questionText" class="text-xl font-semibold text-gray-700 mb-6">Question text will go here.</h2>
+                <div id="optionsContainer" class="mb-6"></div>
+                <button id="submitButton" class="btn btn-primary w-full">Submit Answer</button>
+            </div>
+
+            <div id="endScreen" class="hidden text-center">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">Game Over!</h1>
+                <p id="finalScore" class="text-2xl text-blue-600 mb-2">Your final score is: 0</p>
+                <p id="summaryMessage" class="text-gray-600 mb-6">Great effort!</p>
+                <button id="restartButton" class="btn btn-primary w-full">Play Again</button>
+            </div>
+        </div>
+
+        <div id="dashboardArea" class="dashboard-container hidden"> <h2 class="dashboard-title">Live Dashboard</h2>
+            <div id="playerList" class="space-y-2">
+                <p class="loading-indicator">Loading player data...</p>
+            </div>
+             <p class="text-xs text-gray-500 mt-4 text-center">Your Player ID: <span id="playerIdDisplay" class="font-mono"></span></p>
+        </div>
+    </div>
+
+    <div id="feedbackModal" class="feedback-modal hidden">
+        <div class="feedback-content">
+            <h3 id="feedbackTitle" class="text-2xl font-bold mb-3">Correct!</h3>
+            <p id="feedbackText" class="text-gray-700 mb-4">Explanation goes here.</p>
+            <button id="nextQuestionButton" class="btn btn-primary w-1/2">Next Question</button>
+        </div>
+    </div>
+
+    <script> // Changed to regular script tag as type="module" is not strictly needed without JS imports
+        // --- CONFIGURATION ---
+        const FLASK_SERVER_URL = 'http://localhost:5000'; // Replace with your Flask server's URL
+        const DASHBOARD_REFRESH_INTERVAL = 3000; // milliseconds (e.g., 3 seconds)
+
+        // --- QUESTION BANK ---
+        const questionBank = [
+            {id:1,type:'multiple-choice',question:"What is the primary goal of Data Governance?",options:["To maximize data collection regardless of quality.","To ensure data is accurate, consistent, secure, and used properly.","To restrict all access to data within the organization.","To sell data to third parties without restriction."],answer:"To ensure data is accurate, consistent, secure, and used properly.",explanation:"Data Governance establishes processes to manage data assets, ensuring their quality, security, and compliance throughout their lifecycle."},
+            {id:2,type:'true-false',question:"Data Stewards are solely responsible for the technical implementation of databases.",options:["True","False"],answer:"False",explanation:"Data Stewards are primarily responsible for defining and managing specific data assets, including quality and usage, not typically the low-level technical implementation of databases (which is often an IT role)."},
+            {id:3,type:'fill-in-the-blank',question:"A key aspect of data governance is ensuring data ______, meaning it is fit for its intended purpose.",answer:"quality",explanation:"Data Quality is a core pillar of data governance, ensuring data is accurate, complete, timely, and relevant for its use."},
+            {id:4,type:'select-all-apply',question:"Which of the following are common components of a Data Governance framework? (Select all that apply)",options:["Data Policies and Standards","Data Siloing Initiatives","Data Stewardship Roles","Unlimited Data Access for All Employees","Data Quality Monitoring"],answer:["Data Policies and Standards","Data Stewardship Roles","Data Quality Monitoring"],explanation:"Effective data governance frameworks include policies, defined roles (like stewards), and processes for monitoring data quality. Siloing data and unlimited access are generally counterproductive to good governance."},
+            {id:5,type:'multiple-choice',question:"What does 'GDPR' primarily focus on?",options:["Global Data Pricing Regulation","General Data Protection Regulation","Government Data Processing Rules","General Database Performance Ratios"],answer:"General Data Protection Regulation",explanation:"GDPR (General Data Protection Regulation) is a regulation in EU law on data protection and privacy for all individuals within the European Union and the European Economic Area."},
+            {id:6,type:'true-false',question:"Data Governance is a one-time project, not an ongoing process.",options:["True","False"],answer:"False",explanation:"Data Governance is an ongoing, iterative process that adapts to changing business needs, regulations, and data landscapes."},
+            {id:7,type:'fill-in-the-blank',question:"The term for data that describes other data is ______.",answer:"metadata",explanation:"Metadata provides information about other data's content, context, structure, and origin, and is crucial for data understanding and governance."},
+            {id:8,type:'multiple-choice',question:"Which of these is NOT typically a benefit of good Data Governance?",options:["Improved decision-making","Increased operational efficiency","Higher data storage costs","Enhanced data security and compliance"],answer:"Higher data storage costs",explanation:"While there are costs to implement governance, it often leads to better data management, potentially reducing redundant storage and improving efficiency, rather than directly causing higher storage costs as a primary outcome."},
+            {id:9,type:'select-all-apply',question:"Key principles of Data Governance often include: (Select all that apply)",options:["Accountability","Transparency","Data Hoarding","Integrity","Unrestricted Data Modification"],answer:["Accountability","Transparency","Integrity"],explanation:"Accountability (clear responsibilities), Transparency (clear processes), and Integrity (data accuracy and consistency) are core principles. Data hoarding and unrestricted modification are against good governance."},
+            {id:10,type:'true-false',question:"Data Lineage helps in understanding the origin and transformation of data over time.",options:["True","False"],answer:"True",explanation:"Data Lineage tracks the data lifecycle, which is vital for troubleshooting, compliance, and understanding data dependencies."}
+        ];
+        // --- END OF QUESTION BANK ---
+
+        // DOM Elements
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const submitNameButton = document.getElementById('submitNameButton');
+        const serverStatusDisplay = document.getElementById('serverStatus');
+        const currentPlayerNameDisplay = document.getElementById('currentPlayerNameDisplay');
+        const playerIdDisplay = document.getElementById('playerIdDisplay');
+
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const endScreen = document.getElementById('endScreen');
+        const startButton = document.getElementById('startButton');
+        const questionCounterDisplay = document.getElementById('questionCounter');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const questionTextDisplay = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const submitButton = document.getElementById('submitButton');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const summaryMessageDisplay = document.getElementById('summaryMessage');
+        const restartButton = document.getElementById('restartButton');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const feedbackText = document.getElementById('feedbackText');
+        const nextQuestionButton = document.getElementById('nextQuestionButton');
+        const progressBar = document.getElementById('progressBar');
+        
+        const dashboardArea = document.getElementById('dashboardArea');
+        const playerListDiv = document.getElementById('playerList');
+        const messageBox = document.getElementById('messageBox');
+
+        // Game state variables
+        let currentPlayerId = null; // Will be set by the server upon registration
+        let currentPlayerName = "Player"; // Default
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const MAX_QUESTIONS_PER_GAME = 10;
+        let gameInProgress = false;
+        let dashboardIntervalId = null;
+
+
+        // --- Server Communication Functions ---
+        async function registerPlayer(name) {
+            serverStatusDisplay.textContent = "Registering...";
+            submitNameButton.disabled = true;
+            try {
+                const response = await fetch(`${FLASK_SERVER_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: "Unknown server error during registration." }));
+                    throw new Error(errorData.detail || `Server error: ${response.status}`);
+                }
+                const data = await response.json();
+                currentPlayerId = data.player_id; // Assuming server returns player_id
+                currentPlayerName = name; // Use the name submitted
+                
+                serverStatusDisplay.textContent = `Registered as ${currentPlayerName} (ID: ${currentPlayerId.substring(0,6)}...)`;
+                showCustomAlert(data.message || "Registered successfully!", true);
+                return true;
+            } catch (error) {
+                console.error("Registration error:", error);
+                serverStatusDisplay.textContent = "Registration failed. Check server.";
+                showCustomAlert(`Registration failed: ${error.message}`);
+                submitNameButton.disabled = false;
+                return false;
+            }
+        }
+
+        async function updatePlayerStatus(statusData) {
+            if (!currentPlayerId) return; // Not registered
+            try {
+                const payload = {
+                    player_id: currentPlayerId,
+                    name: currentPlayerName, // Send name along for server convenience
+                    ...statusData // score, currentQuestionNumber, totalQuestionsInGame, status
+                };
+                const response = await fetch(`${FLASK_SERVER_URL}/update_status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                     const errorData = await response.json().catch(() => ({ detail: "Unknown server error updating status." }));
+                    throw new Error(errorData.detail || `Server error: ${response.status}`);
+                }
+                // const data = await response.json(); // Optional: process success message
+                // console.log("Status update response:", data.message);
+            } catch (error) {
+                console.error("Error updating player status:", error);
+                showCustomAlert(`Error updating status: ${error.message}`);
+            }
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(`${FLASK_SERVER_URL}/dashboard`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: "Unknown server error fetching dashboard." }));
+                    throw new Error(errorData.detail || `Server error: ${response.status}`);
+                }
+                const players = await response.json();
+                renderDashboard(players);
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500">Error loading dashboard. Is server running?</p>';
+            }
+        }
+
+        function renderDashboard(players) {
+            if (!Array.isArray(players)) {
+                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500">Invalid dashboard data received.</p>';
+                return;
+            }
+            if (players.length === 0) {
+                playerListDiv.innerHTML = '<p class="loading-indicator">No active players yet. Be the first!</p>';
+                return;
+            }
+            playerListDiv.innerHTML = ''; // Clear previous entries
+
+            players.sort((a, b) => { // Sort by score (desc), then by name (asc)
+                if (b.score !== a.score) return b.score - a.score;
+                return (a.name || "").localeCompare(b.name || "");
+            });
+
+            players.forEach(player => {
+                const playerEntry = document.createElement('div');
+                playerEntry.classList.add('player-entry');
+                if (player.player_id === currentPlayerId) {
+                    playerEntry.classList.add('border-blue-500', 'bg-blue-50');
+                }
+
+                let progressText = "";
+                if (player.status === "playing" && player.total_questions_in_game > 0) {
+                    progressText = `Q: ${player.current_question_number || 0}/${player.total_questions_in_game}`;
+                } else if (player.status === "finished") {
+                    progressText = "Finished";
+                } else if (player.status === "waiting") {
+                    progressText = "Waiting...";
+                }
+
+                playerEntry.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="player-name">${player.name || 'Unnamed Player'} ${player.player_id === currentPlayerId ? "(You)" : ""}</span>
+                        <span class="player-score">Score: ${player.score || 0}</span>
+                    </div>
+                    ${progressText ? `<div class="text-xs text-gray-500 mt-1">${progressText}</div>` : ""}
+                `;
+                playerListDiv.appendChild(playerEntry);
+            });
+        }
+        
+        // --- UI and Game Logic Functions ---
+        async function handleNameSubmission() {
+            const name = playerNameInput.value.trim();
+            if (!name) {
+                showCustomAlert("Please enter your name.");
+                return;
+            }
+
+            const success = await registerPlayer(name);
+            if (success) {
+                nameModal.classList.add('hidden');
+                dashboardArea.classList.remove('hidden');
+                startScreen.classList.remove('hidden');
+                currentPlayerNameDisplay.textContent = currentPlayerName;
+                playerIdDisplay.textContent = currentPlayerId ? currentPlayerId.substring(0,8)+'...' : 'N/A';
+
+                // Initial status update for "waiting"
+                updatePlayerStatus({
+                    score: 0,
+                    current_question_number: 0,
+                    total_questions_in_game: 0,
+                    status: "waiting"
+                });
+                fetchDashboardData(); // Initial fetch
+                if (dashboardIntervalId) clearInterval(dashboardIntervalId); // Clear existing interval if any
+                dashboardIntervalId = setInterval(fetchDashboardData, DASHBOARD_REFRESH_INTERVAL);
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startGame() {
+            gameInProgress = true;
+            shuffleArray(questionBank);
+            currentQuestions = questionBank.slice(0, Math.min(MAX_QUESTIONS_PER_GAME, questionBank.length));
+            
+            if (currentQuestions.length === 0) {
+                showCustomAlert("No questions available in the bank!");
+                gameInProgress = false;
+                return;
+            }
+
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            feedbackModal.classList.add('hidden');
+            updateScoreDisplay();
+            loadQuestion();
+
+            updatePlayerStatus({
+                score: 0,
+                current_question_number: 1,
+                total_questions_in_game: currentQuestions.length,
+                status: "playing"
+            });
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const questionData = currentQuestions[currentQuestionIndex];
+            questionTextDisplay.textContent = questionData.question;
+            questionCounterDisplay.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+            optionsContainer.innerHTML = '';
+            submitButton.disabled = true;
+
+            const progressPercentage = ((currentQuestionIndex) / currentQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            if (questionData.type === 'multiple-choice' || questionData.type === 'true-false') {
+                questionData.options.forEach(optionText => {
+                    const button = document.createElement('button');
+                    button.textContent = optionText;
+                    button.classList.add('option-btn');
+                    button.addEventListener('click', () => {
+                        document.querySelectorAll('#optionsContainer .option-btn').forEach(btn => btn.classList.remove('selected'));
+                        button.classList.add('selected');
+                        submitButton.disabled = false;
+                    });
+                    optionsContainer.appendChild(button);
+                });
+            } else if (questionData.type === 'fill-in-the-blank') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.classList.add('fill-in-input');
+                input.placeholder = 'Type your answer here...';
+                optionsContainer.appendChild(input);
+                input.addEventListener('input', () => {
+                    submitButton.disabled = input.value.trim() === '';
+                });
+                submitButton.disabled = true;
+            } else if (questionData.type === 'select-all-apply') {
+                questionData.options.forEach(optionText => {
+                    const label = document.createElement('label');
+                    label.classList.add('checkbox-label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox'; checkbox.value = optionText; checkbox.name = 'selectAllOption';
+                    const span = document.createElement('span'); span.textContent = optionText;
+                    label.appendChild(checkbox); label.appendChild(span);
+                    optionsContainer.appendChild(label);
+                    checkbox.addEventListener('change', () => {
+                        const anyChecked = Array.from(document.querySelectorAll('input[name="selectAllOption"]:checked')).length > 0;
+                        submitButton.disabled = !anyChecked;
+                    });
+                });
+                submitButton.disabled = true;
+            }
+        }
+
+        function handleSubmit() {
+            const questionData = currentQuestions[currentQuestionIndex];
+            let userAnswer;
+            let isCorrect = false;
+
+            if (questionData.type === 'multiple-choice' || questionData.type === 'true-false') {
+                const selectedButton = optionsContainer.querySelector('.option-btn.selected');
+                if (selectedButton) {
+                    userAnswer = selectedButton.textContent;
+                    isCorrect = userAnswer === questionData.answer;
+                }
+            } else if (questionData.type === 'fill-in-the-blank') {
+                const inputField = optionsContainer.querySelector('.fill-in-input');
+                if (inputField) {
+                    userAnswer = inputField.value.trim().toLowerCase();
+                    if (Array.isArray(questionData.answer)) {
+                        isCorrect = questionData.answer.map(a => a.toLowerCase()).includes(userAnswer);
+                    } else {
+                        isCorrect = userAnswer === questionData.answer.toLowerCase();
+                    }
+                }
+            } else if (questionData.type === 'select-all-apply') {
+                const checkedBoxes = Array.from(optionsContainer.querySelectorAll('input[name="selectAllOption"]:checked'));
+                userAnswer = checkedBoxes.map(cb => cb.value);
+                const correctAnswerSet = new Set(questionData.answer);
+                const userAnswerSet = new Set(userAnswer);
+                isCorrect = correctAnswerSet.size === userAnswerSet.size && [...correctAnswerSet].every(val => userAnswerSet.has(val));
+            }
+
+            if (isCorrect) {
+                score++;
+                feedbackTitle.textContent = "Correct!";
+                feedbackTitle.className = 'text-2xl font-bold mb-3 text-green-600';
+            } else {
+                feedbackTitle.textContent = "Incorrect!";
+                feedbackTitle.className = 'text-2xl font-bold mb-3 text-red-600';
+            }
+            updateScoreDisplay();
+            feedbackText.textContent = questionData.explanation;
+            feedbackModal.classList.remove('hidden');
+
+            let statusUpdate = "playing";
+            let nextQNum = currentQuestionIndex + 1; // current question (0-indexed) + 1 for 1-indexed display
+            if (nextQNum >= currentQuestions.length) { // If this was the last question
+                 statusUpdate = "finished";
+            }
+
+            updatePlayerStatus({
+                score: score,
+                current_question_number: nextQNum, // Send the number of the question just answered
+                status: statusUpdate,
+                total_questions_in_game: currentQuestions.length // ensure this is always sent
+            });
+        }
+
+        function handleNextQuestion() {
+            currentQuestionIndex++; // Move to the next question index
+            feedbackModal.classList.add('hidden');
+            const progressPercentage = ((currentQuestionIndex) / currentQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            loadQuestion(); // This will call endGame if no more questions
+
+            // Update status for the question we are *about to load*
+            // This might be redundant if handleSubmit already covers it, but ensures progress is shown
+            if (currentQuestionIndex < currentQuestions.length) {
+                 updatePlayerStatus({
+                    score: score,
+                    current_question_number: currentQuestionIndex + 1, // Next question to be played
+                    status: "playing",
+                    total_questions_in_game: currentQuestions.length
+                });
+            }
+        }
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = `Score: ${score}`;
+        }
+
+        function endGame() {
+            gameInProgress = false;
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            progressBar.style.width = `100%`;
+            finalScoreDisplay.textContent = `Your final score is: ${score} out of ${currentQuestions.length}`;
+            
+            let message = "Good effort!";
+            const percentage = currentQuestions.length > 0 ? (score / currentQuestions.length) * 100 : 0;
+            if (percentage === 100) message = "Excellent! You're a Data Governance expert!";
+            else if (percentage >= 75) message = "Great job! You have a strong understanding.";
+            else if (percentage >= 50) message = "Not bad! Keep learning and try again.";
+            else message = "Keep practicing to improve your knowledge!";
+            summaryMessageDisplay.textContent = message;
+
+            updatePlayerStatus({
+                score: score,
+                current_question_number: currentQuestions.length, // All questions answered
+                status: "finished",
+                total_questions_in_game: currentQuestions.length
+            });
+        }
+        
+        function showCustomAlert(message, isSuccess = false, duration = 3000) {
+            messageBox.textContent = message;
+            messageBox.classList.remove('success'); // Remove first
+            if(isSuccess) {
+                messageBox.classList.add('success');
+            }
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, duration);
+        }
+
+        // Event Listeners
+        submitNameButton.addEventListener('click', handleNameSubmission);
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleNameSubmission();
+            }
+        });
+        startButton.addEventListener('click', startGame);
+        submitButton.addEventListener('click', handleSubmit);
+        nextQuestionButton.addEventListener('click', handleNextQuestion);
+        restartButton.addEventListener('click', () => {
+            endScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden'); // Go back to start screen
+            // Player status in server should reflect they are waiting to start a new game
+            updatePlayerStatus({
+                score: 0,
+                current_question_number: 0,
+                total_questions_in_game: 0, // Will be set when game starts
+                status: "waiting"
+            });
+        });
+        
+        // Initial check for server (optional, can be removed if not needed)
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${FLASK_SERVER_URL}/dashboard`); // or a dedicated /health endpoint
+                if (response.ok) {
+                    serverStatusDisplay.textContent = "Connected to server. Enter your name.";
+                    submitNameButton.disabled = false;
+                } else {
+                    serverStatusDisplay.textContent = "Server offline or unreachable.";
+                    submitNameButton.disabled = true;
+                     showCustomAlert("Cannot connect to the game server. Dashboard will be unavailable.");
+                }
+            } catch (error) {
+                serverStatusDisplay.textContent = "Error connecting to server.";
+                submitNameButton.disabled = true;
+                showCustomAlert("Error connecting to game server. Please ensure it's running.");
+                console.error("Initial server check failed:", error);
+            }
+        }
+
+        // Run initial server check when the page loads
+        window.addEventListener('load', checkServerStatus);
+
+        // Cleanup dashboard polling when user leaves (optional, server should handle stale data)
+        window.addEventListener('beforeunload', () => {
+            if (dashboardIntervalId) {
+                clearInterval(dashboardIntervalId);
+            }
+            // Optionally, try to notify the server the player is leaving
+            // This is not guaranteed to work, especially for tab closes.
+            // if (currentPlayerId) {
+            //     navigator.sendBeacon(`${FLASK_SERVER_URL}/leave`, JSON.stringify({ player_id: currentPlayerId }));
+            // }
+        });
+
+    </script>
+</body>
+</html>
