@@ -252,17 +252,18 @@
         const DASHBOARD_REFRESH_INTERVAL = 3000; // milliseconds (e.g., 3 seconds)
 
         // --- QUESTION BANK ---
+        // Added 'points' to each question object
         const questionBank = [
-            {id:1,type:'multiple-choice',question:"What is the primary goal of Data Governance?",options:["To maximize data collection regardless of quality.","To ensure data is accurate, consistent, secure, and used properly.","To restrict all access to data within the organization.","To sell data to third parties without restriction."],answer:"To ensure data is accurate, consistent, secure, and used properly.",explanation:"Data Governance establishes processes to manage data assets, ensuring their quality, security, and compliance throughout their lifecycle."},
-            {id:2,type:'true-false',question:"Data Stewards are solely responsible for the technical implementation of databases.",options:["True","False"],answer:"False",explanation:"Data Stewards are primarily responsible for defining and managing specific data assets, including quality and usage, not typically the low-level technical implementation of databases (which is often an IT role)."},
-            {id:3,type:'fill-in-the-blank',question:"A key aspect of data governance is ensuring data ______, meaning it is fit for its intended purpose.",answer:"quality",explanation:"Data Quality is a core pillar of data governance, ensuring data is accurate, complete, timely, and relevant for its use."},
-            {id:4,type:'select-all-apply',question:"Which of the following are common components of a Data Governance framework? (Select all that apply)",options:["Data Policies and Standards","Data Siloing Initiatives","Data Stewardship Roles","Unlimited Data Access for All Employees","Data Quality Monitoring"],answer:["Data Policies and Standards","Data Stewardship Roles","Data Quality Monitoring"],explanation:"Effective data governance frameworks include policies, defined roles (like stewards), and processes for monitoring data quality. Siloing data and unlimited access are generally counterproductive to good governance."},
-            {id:5,type:'multiple-choice',question:"What does 'GDPR' primarily focus on?",options:["Global Data Pricing Regulation","General Data Protection Regulation","Government Data Processing Rules","General Database Performance Ratios"],answer:"General Data Protection Regulation",explanation:"GDPR (General Data Protection Regulation) is a regulation in EU law on data protection and privacy for all individuals within the European Union and the European Economic Area."},
-            {id:6,type:'true-false',question:"Data Governance is a one-time project, not an ongoing process.",options:["True","False"],answer:"False",explanation:"Data Governance is an ongoing, iterative process that adapts to changing business needs, regulations, and data landscapes."},
-            {id:7,type:'fill-in-the-blank',question:"The term for data that describes other data is ______.",answer:"metadata",explanation:"Metadata provides information about other data's content, context, structure, and origin, and is crucial for data understanding and governance."},
-            {id:8,type:'multiple-choice',question:"Which of these is NOT typically a benefit of good Data Governance?",options:["Improved decision-making","Increased operational efficiency","Higher data storage costs","Enhanced data security and compliance"],answer:"Higher data storage costs",explanation:"While there are costs to implement governance, it often leads to better data management, potentially reducing redundant storage and improving efficiency, rather than directly causing higher storage costs as a primary outcome."},
-            {id:9,type:'select-all-apply',question:"Key principles of Data Governance often include: (Select all that apply)",options:["Accountability","Transparency","Data Hoarding","Integrity","Unrestricted Data Modification"],answer:["Accountability","Transparency","Integrity"],explanation:"Accountability (clear responsibilities), Transparency (clear processes), and Integrity (data accuracy and consistency) are core principles. Data hoarding and unrestricted modification are against good governance."},
-            {id:10,type:'true-false',question:"Data Lineage helps in understanding the origin and transformation of data over time.",options:["True","False"],answer:"True",explanation:"Data Lineage tracks the data lifecycle, which is vital for troubleshooting, compliance, and understanding data dependencies."}
+            {id:1, type:'multiple-choice', question:"What is the primary goal of Data Governance?", options:["To maximize data collection regardless of quality.","To ensure data is accurate, consistent, secure, and used properly.","To restrict all access to data within the organization.","To sell data to third parties without restriction."], answer:"To ensure data is accurate, consistent, secure, and used properly.", explanation:"Data Governance establishes processes to manage data assets, ensuring their quality, security, and compliance throughout their lifecycle.", points: 10},
+            {id:2, type:'true-false', question:"Data Stewards are solely responsible for the technical implementation of databases.", options:["True","False"], answer:"False", explanation:"Data Stewards are primarily responsible for defining and managing specific data assets, including quality and usage, not typically the low-level technical implementation of databases (which is often an IT role).", points: 5},
+            {id:3, type:'fill-in-the-blank', question:"A key aspect of data governance is ensuring data ______, meaning it is fit for its intended purpose.", answer:"quality", explanation:"Data Quality is a core pillar of data governance, ensuring data is accurate, complete, timely, and relevant for its use.", points: 15},
+            {id:4, type:'select-all-apply', question:"Which of the following are common components of a Data Governance framework? (Select all that apply)", options:["Data Policies and Standards","Data Siloing Initiatives","Data Stewardship Roles","Unlimited Data Access for All Employees","Data Quality Monitoring"], answer:["Data Policies and Standards","Data Stewardship Roles","Data Quality Monitoring"], explanation:"Effective data governance frameworks include policies, defined roles (like stewards), and processes for monitoring data quality. Siloing data and unlimited access are generally counterproductive to good governance.", points: 20},
+            {id:5, type:'multiple-choice', question:"What does 'GDPR' primarily focus on?", options:["Global Data Pricing Regulation","General Data Protection Regulation","Government Data Processing Rules","General Database Performance Ratios"], answer:"General Data Protection Regulation", explanation:"GDPR (General Data Protection Regulation) is a regulation in EU law on data protection and privacy for all individuals within the European Union and the European Economic Area.", points: 10},
+            {id:6, type:'true-false', question:"Data Governance is a one-time project, not an ongoing process.", options:["True","False"], answer:"False", explanation:"Data Governance is an ongoing, iterative process that adapts to changing business needs, regulations, and data landscapes.", points: 5},
+            {id:7, type:'fill-in-the-blank', question:"The term for data that describes other data is ______.", answer:"metadata", explanation:"Metadata provides information about other data's content, context, structure, and origin, and is crucial for data understanding and governance.", points: 15},
+            {id:8, type:'multiple-choice', question:"Which of these is NOT typically a benefit of good Data Governance?", options:["Improved decision-making","Increased operational efficiency","Higher data storage costs","Enhanced data security and compliance"], answer:"Higher data storage costs", explanation:"While there are costs to implement governance, it often leads to better data management, potentially reducing redundant storage and improving efficiency, rather than directly causing higher storage costs as a primary outcome.", points: 10},
+            {id:9, type:'select-all-apply', question:"Key principles of Data Governance often include: (Select all that apply)", options:["Accountability","Transparency","Data Hoarding","Integrity","Unrestricted Data Modification"], answer:["Accountability","Transparency","Integrity"], explanation:"Accountability (clear responsibilities), Transparency (clear processes), and Integrity (data accuracy and consistency) are core principles. Data hoarding and unrestricted modification are against good governance.", points: 20},
+            {id:10, type:'true-false', question:"Data Lineage helps in understanding the origin and transformation of data over time.", options:["True","False"], answer:"True", explanation:"Data Lineage tracks the data lifecycle, which is vital for troubleshooting, compliance, and understanding data dependencies.", points: 5}
         ];
         // --- END OF QUESTION BANK ---
 
@@ -302,7 +303,7 @@
         let currentQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
-        const MAX_QUESTIONS_PER_GAME = 10;
+        const MAX_QUESTIONS_PER_GAME = 10; // This can be adjusted if questionBank has more/less
         let gameInProgress = false;
         let dashboardIntervalId = null;
 
@@ -395,7 +396,7 @@
                 const playerEntry = document.createElement('div');
                 playerEntry.classList.add('player-entry');
                 if (player.player_id === currentPlayerId) {
-                    playerEntry.classList.add('current-player'); // Use custom class for HSBC style highlight
+                    playerEntry.classList.add('current-player');
                 }
 
                 let progressText = "";
@@ -446,11 +447,9 @@
             }
         }
 
-        // REMOVED: function shuffleArray(array) { ... }
 
         function startGame() {
             gameInProgress = true;
-            // REMOVED: shuffleArray(questionBank);
             currentQuestions = questionBank.slice(0, Math.min(MAX_QUESTIONS_PER_GAME, questionBank.length));
             
             if (currentQuestions.length === 0) {
@@ -561,12 +560,13 @@
             }
 
             if (isCorrect) {
-                score++;
+                // Use questionData.points if available, otherwise default to 1
+                score += (questionData.points || 1); 
                 feedbackTitle.textContent = "Correct!";
-                feedbackTitle.className = 'text-2xl font-bold mb-3 text-green-600'; // This will be overridden by CSS
+                feedbackTitle.className = 'text-2xl font-bold mb-3 text-green-600';
             } else {
                 feedbackTitle.textContent = "Incorrect!";
-                feedbackTitle.className = 'text-2xl font-bold mb-3 text-red-600'; // This will be overridden by CSS
+                feedbackTitle.className = 'text-2xl font-bold mb-3 text-red-600';
             }
             updateScoreDisplay();
             feedbackText.textContent = questionData.explanation;
@@ -595,7 +595,7 @@
 
             if (currentQuestionIndex < currentQuestions.length) {
                  updatePlayerStatus({
-                    score: score,
+                    score: score, // Score is already updated from handleSubmit
                     current_question_number: currentQuestionIndex + 1,
                     status: "playing",
                     total_questions_in_game: currentQuestions.length
@@ -612,10 +612,15 @@
             gameScreen.classList.add('hidden');
             endScreen.classList.remove('hidden');
             progressBar.style.width = `100%`;
-            finalScoreDisplay.textContent = `Your final score is: ${score} out of ${currentQuestions.length}`;
+            finalScoreDisplay.textContent = `Your final score is: ${score}`; // Total score from accumulated points
             
+            // Summary message can remain the same, or you could adjust thresholds based on total possible points
+            let totalPossiblePoints = 0;
+            currentQuestions.forEach(q => totalPossiblePoints += (q.points || 1));
+
             let message = "Good effort!";
-            const percentage = currentQuestions.length > 0 ? (score / currentQuestions.length) * 100 : 0;
+            const percentage = totalPossiblePoints > 0 ? (score / totalPossiblePoints) * 100 : 0;
+
             if (percentage === 100) message = "Excellent! You're a Data Governance expert!";
             else if (percentage >= 75) message = "Great job! You have a strong understanding.";
             else if (percentage >= 50) message = "Not bad! Keep learning and try again.";
@@ -656,7 +661,7 @@
             endScreen.classList.add('hidden');
             startScreen.classList.remove('hidden');
             updatePlayerStatus({
-                score: 0,
+                score: 0, // Reset score for new game
                 current_question_number: 0,
                 total_questions_in_game: 0,
                 status: "waiting"
