@@ -49,18 +49,21 @@
             width: 100%;
             max-width: 700px;
             margin: 0 auto;
-            padding: 1.5rem;
+            padding: 1rem;
             background-color: var(--hsbc-white);
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             border: 1px solid var(--hsbc-medium-gray);
+            overflow-x: auto;
         }
-        @media (min-width: 1024px) { /* lg breakpoint */
+        @media (min-width: 1024px) {
             .dashboard-container {
                 width: 350px;
-                min-width: 300px;
-                max-width: none;
+                min-width: 350px;
+                max-width: 350px;
                 margin: 0;
+                padding: 1rem;
+                overflow-x: hidden;
             }
         }
 
@@ -181,7 +184,129 @@
         #finalScore { color: var(--hsbc-red); }
         .feedback-content .text-green-600 { color: #008452 !important; } /* Override Tailwind green */
         .feedback-content .text-red-600 { color: var(--hsbc-red) !important; } /* Override Tailwind red */
+        #feedbackTimeTaken {
+            font-size: 0.875rem; /* text-sm */
+            color: #555555; /* Slightly lighter dark gray */
+            margin-top: 0.5rem; /* mb-2 */
+        }
+        /* Dashboard table styles */
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            table-layout: fixed;
+        }
+        .dashboard-table th {
+            background-color: var(--hsbc-dark-gray);
+            color: var(--hsbc-white);
+            padding: 0.25rem 0.125rem;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid var(--hsbc-medium-gray);
+            font-size: 0.75rem;
+        }
+        .dashboard-table td {
+            padding: 0.25rem 0.125rem;
+            border: 1px solid var(--hsbc-medium-gray);
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        .player-name-cell {
+            background-color: var(--hsbc-dark-gray);
+            color: var(--hsbc-white);
+            font-weight: 600;
+            text-align: left;
+            padding-left: 0.5rem;
+            width: 85px;
+            min-width: 85px;
+            max-width: 85px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.75rem;
+        }
+        .player-name-cell.current-player {
+            background-color: var(--hsbc-red);
+        }
+        .question-cell {
+            width: 24px;
+            height: 28px;
+            background-color: var(--hsbc-white);
+            border: 1px solid var(--hsbc-medium-gray);
+            position: relative;
+            font-size: 0.625rem;
+            line-height: 1;
+            padding: 0.125rem;
+        }
+        .question-cell.correct {
+            background-color: #22c55e; /* Green */
+            border-color: #16a34a;
+            color: var(--hsbc-white);
+            font-weight: 600;
+        }
+        .question-cell.incorrect {
+            background-color: #ef4444; /* Red */
+            border-color: #dc2626;
+            color: var(--hsbc-white);
+            font-weight: 600;
+        }
+        .question-cell.fastest {
+            background-color: #fde047; /* Yellow */
+            border-color: #facc15;
+            color: var(--hsbc-dark-gray);
+            font-weight: 700;
+        }
+        .question-cell.unanswered {
+            background-color: var(--hsbc-white);
+            border-color: var(--hsbc-medium-gray);
+            color: var(--hsbc-dark-gray);
+        }
+        .score-cell {
+            background-color: var(--hsbc-light-gray);
+            color: var(--hsbc-red);
+            font-weight: 700;
+            font-size: 0.875rem;
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            border: 1px solid var(--hsbc-medium-gray);
+            padding: 0.25rem 0.125rem;
+        }
+        .score-cell.current-player {
+            background-color: #ffe5e8; /* Very light red tint */
+            border-color: var(--hsbc-red);
+        }
 
+        /* 针对小屏幕优化 */
+        @media (max-width: 480px) {
+            .dashboard-table {
+                font-size: 0.625rem;
+            }
+            .player-name-cell {
+                width: 70px;
+                min-width: 70px;
+                max-width: 70px;
+                font-size: 0.625rem;
+            }
+            .question-cell {
+                width: 20px;
+                height: 24px;
+                font-size: 0.5rem;
+                padding: 0.0625rem;
+            }
+            .score-cell {
+                width: 40px;
+                min-width: 40px;
+                max-width: 40px;
+                font-size: 0.75rem;
+            }
+            .dashboard-table th,
+            .dashboard-table td {
+                padding: 0.125rem 0.0625rem;
+                font-size: 0.625rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -189,6 +314,7 @@
 
     <div class="container-wrapper">
         <div id="gameArea" class="game-container">
+            <!-- Player Name Modal -->
             <div id="nameModal" class="name-modal">
                 <div class="name-content">
                     <h2 class="text-2xl font-bold mb-4">Welcome, Challenger!</h2>
@@ -199,6 +325,7 @@
                 </div>
             </div>
 
+            <!-- Start Screen (hidden by default after name entry) -->
             <div id="startScreen" class="hidden">
                 <h1 class="text-3xl font-bold text-center mb-4">Data Governance Challenge!</h1>
                 <p class="mb-2 text-center">Player: <span id="currentPlayerNameDisplay" class="font-semibold"></span></p>
@@ -208,9 +335,10 @@
                 <button id="startButton" class="btn btn-primary w-full">Start Game</button>
             </div>
 
+            <!-- Game Screen (hidden by default) -->
             <div id="gameScreen" class="hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <p id="questionCounter" class="text-sm text-gray-500">Question 1 of 10</p>
+                    <p id="questionCounter" class="text-sm text-gray-500">Question 1 of 5</p>
                     <p id="scoreDisplay" class="text-lg font-semibold">Score: 0</p>
                 </div>
                 <div class="progress-bar-container">
@@ -221,6 +349,7 @@
                 <button id="submitButton" class="btn btn-primary w-full">Submit Answer</button>
             </div>
 
+            <!-- End Screen (hidden by default) -->
             <div id="endScreen" class="hidden text-center">
                 <h1 class="text-3xl font-bold mb-4">Game Over!</h1>
                 <p id="finalScore" class="text-2xl mb-2">Your final score is: 0</p>
@@ -231,13 +360,40 @@
 
         <div id="dashboardArea" class="dashboard-container hidden">
             <h2 class="dashboard-title">Live Dashboard</h2>
-            <div id="playerList" class="space-y-2">
-                <p class="loading-indicator">Loading player data...</p>
+            <div id="playerTableContainer">
+                <table class="dashboard-table">
+                    <colgroup>
+                        <col style="width: 85px;">
+                        <col style="width: 24px;">
+                        <col style="width: 24px;">
+                        <col style="width: 24px;">
+                        <col style="width: 24px;">
+                        <col style="width: 24px;">
+                        <col style="width: 50px;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Q1</th>
+                            <th>Q2</th>
+                            <th>Q3</th>
+                            <th>Q4</th>
+                            <th>Q5</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerTableBody">
+                        <tr>
+                            <td colspan="7" class="loading-indicator">Loading player data...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-             <p class="text-xs text-gray-500 mt-4 text-center">Your Player ID: <span id="playerIdDisplay" class="font-mono"></span></p>
+            <p class="text-xs text-gray-500 mt-4 text-center">Your Player ID: <span id="playerIdDisplay" class="font-mono"></span></p>
         </div>
     </div>
 
+    <!-- Feedback Modal (hidden by default) -->
     <div id="feedbackModal" class="feedback-modal hidden">
         <div class="feedback-content">
             <h3 id="feedbackTitle" class="text-2xl font-bold mb-3">Correct!</h3>
@@ -252,7 +408,6 @@
         const DASHBOARD_REFRESH_INTERVAL = 3000; // milliseconds (e.g., 3 seconds)
 
         // --- QUESTION BANK ---
-        // Added 'points' to each question object
         const questionBank = [
             {id:1, type:'multiple-choice', question:"What is the primary goal of Data Governance?", options:["To maximize data collection regardless of quality.","To ensure data is accurate, consistent, secure, and used properly.","To restrict all access to data within the organization.","To sell data to third parties without restriction."], answer:"To ensure data is accurate, consistent, secure, and used properly.", explanation:"Data Governance establishes processes to manage data assets, ensuring their quality, security, and compliance throughout their lifecycle.", points: 10},
             {id:2, type:'true-false', question:"Data Stewards are solely responsible for the technical implementation of databases.", options:["True","False"], answer:"False", explanation:"Data Stewards are primarily responsible for defining and managing specific data assets, including quality and usage, not typically the low-level technical implementation of databases (which is often an IT role).", points: 5},
@@ -294,7 +449,7 @@
         const progressBar = document.getElementById('progressBar');
         
         const dashboardArea = document.getElementById('dashboardArea');
-        const playerListDiv = document.getElementById('playerList');
+        const playerTableBody = document.getElementById('playerTableBody');
         const messageBox = document.getElementById('messageBox');
 
         // Game state variables
@@ -303,10 +458,13 @@
         let currentQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
-        const MAX_QUESTIONS_PER_GAME = 10; // This can be adjusted if questionBank has more/less
+        const MAX_QUESTIONS_PER_GAME = 5;
         let gameInProgress = false;
         let dashboardIntervalId = null;
-
+        let questionStartTime = 0;
+        
+        // Add new variables to track detailed player data
+        let playerDetailedData = {};
 
         // --- Server Communication Functions ---
         async function registerPlayer(name) {
@@ -344,7 +502,7 @@
                 const payload = {
                     player_id: currentPlayerId,
                     name: currentPlayerName,
-                    ...statusData
+                    ...statusData // This will include score, question_id, time_spent_ms, etc.
                 };
                 const response = await fetch(`${FLASK_SERVER_URL}/update_status`, {
                     method: 'POST',
@@ -355,6 +513,12 @@
                      const errorData = await response.json().catch(() => ({ detail: "Unknown server error updating status." }));
                     throw new Error(errorData.detail || `Server error: ${response.status}`);
                 }
+                // Optionally, the server could return the updated score including bonus
+                // const data = await response.json();
+                // if (data && typeof data.new_score !== 'undefined') {
+                //     score = data.new_score; // Update local score if server sends it back
+                //     updateScoreDisplay();
+                // }
             } catch (error) {
                 console.error("Error updating player status:", error);
                 showCustomAlert(`Error updating status: ${error.message}`);
@@ -369,56 +533,135 @@
                     throw new Error(errorData.detail || `Server error: ${response.status}`);
                 }
                 const players = await response.json();
-                renderDashboard(players);
+                renderDashboardTable(players);
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
-                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500" style="color: var(--hsbc-red);">Error loading dashboard. Is server running?</p>';
+                playerTableBody.innerHTML = '<tr><td colspan="7" class="loading-indicator text-red-500" style="color: var(--hsbc-red);">Error loading dashboard. Is server running?</td></tr>';
             }
         }
 
-        function renderDashboard(players) {
+        function renderDashboardTable(players) {
             if (!Array.isArray(players)) {
-                playerListDiv.innerHTML = '<p class="loading-indicator text-red-500" style="color: var(--hsbc-red);">Invalid dashboard data received.</p>';
+                playerTableBody.innerHTML = '<tr><td colspan="7" class="loading-indicator text-red-500" style="color: var(--hsbc-red);">Invalid dashboard data received.</td></tr>';
                 return;
             }
             if (players.length === 0) {
-                playerListDiv.innerHTML = '<p class="loading-indicator">No active players yet. Be the first!</p>';
+                playerTableBody.innerHTML = '<tr><td colspan="7" class="loading-indicator">No active players yet. Be the first!</td></tr>';
                 return;
             }
-            playerListDiv.innerHTML = '';
 
+            // Sort players by score (descending) then by name
             players.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
                 return (a.name || "").localeCompare(b.name || "");
             });
 
+            playerTableBody.innerHTML = '';
+
             players.forEach(player => {
-                const playerEntry = document.createElement('div');
-                playerEntry.classList.add('player-entry');
+                const row = document.createElement('tr');
+                
+                // Player name cell
+                const nameCell = document.createElement('td');
+                nameCell.className = 'player-name-cell';
                 if (player.player_id === currentPlayerId) {
-                    playerEntry.classList.add('current-player');
+                    nameCell.classList.add('current-player');
+                }
+                
+                const displayName = player.name || 'Unnamed';
+                const nameWithIndicator = player.player_id === currentPlayerId ? `${displayName} (You)` : displayName;
+                nameCell.textContent = nameWithIndicator;
+                nameCell.title = nameWithIndicator; // Tooltip for long names
+                row.appendChild(nameCell);
+
+                // Question status cells (Q1-Q5)
+                for (let questionNum = 1; questionNum <= 5; questionNum++) {
+                    const questionCell = document.createElement('td');
+                    questionCell.className = 'question-cell';
+                    
+                    // Get real question status from server data
+                    const cellStatus = getRealQuestionCellStatus(player, questionNum);
+                    questionCell.classList.add(cellStatus);
+                    
+                    // Add question number as text content for clarity
+                    questionCell.textContent = questionNum;
+                    
+                    // Add tooltip with detailed information
+                    const tooltip = getQuestionTooltip(player, questionNum);
+                    if (tooltip) {
+                        questionCell.title = tooltip;
+                    }
+                    
+                    row.appendChild(questionCell);
                 }
 
-                let progressText = "";
-                if (player.status === "playing" && player.total_questions_in_game > 0) {
-                    progressText = `Q: ${player.current_question_number || 0}/${player.total_questions_in_game}`;
-                } else if (player.status === "finished") {
-                    progressText = "Finished";
-                } else if (player.status === "waiting") {
-                    progressText = "Waiting...";
+                // Score cell
+                const scoreCell = document.createElement('td');
+                scoreCell.className = 'score-cell';
+                if (player.player_id === currentPlayerId) {
+                    scoreCell.classList.add('current-player');
                 }
+                scoreCell.textContent = player.score || 0;
+                scoreCell.title = `Total Score: ${player.score || 0} points${player.bonus_earned ? `\nBonus Points: ${player.bonus_earned}` : ''}`;
+                row.appendChild(scoreCell);
 
-                playerEntry.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="player-name">${player.name || 'Unnamed Player'} ${player.player_id === currentPlayerId ? "(You)" : ""}</span>
-                        <span class="player-score">Score: ${player.score || 0}</span>
-                    </div>
-                    ${progressText ? `<div class="text-xs text-gray-500 mt-1">${progressText}</div>` : ""}
-                `;
-                playerListDiv.appendChild(playerEntry);
+                playerTableBody.appendChild(row);
             });
         }
-        
+
+        function getRealQuestionCellStatus(player, questionNumber) {
+            const questionId = questionNumber.toString();
+            
+            // Check if player has question details from server
+            if (!player.question_details || !player.question_details[questionId]) {
+                return 'unanswered';
+            }
+            
+            const questionDetail = player.question_details[questionId];
+            
+            // If not answered yet
+            if (!questionDetail.answered) {
+                return 'unanswered';
+            }
+            
+            // If answered incorrectly
+            if (!questionDetail.correct) {
+                return 'incorrect';
+            }
+            
+            // If answered correctly and is the fastest
+            if (questionDetail.correct && questionDetail.fastest) {
+                return 'fastest';
+            }
+            
+            // If answered correctly but not the fastest
+            if (questionDetail.correct) {
+                return 'correct';
+            }
+            
+            return 'unanswered';
+        }
+
+        function getQuestionTooltip(player, questionNumber) {
+            const questionId = questionNumber.toString();
+            
+            if (!player.question_details || !player.question_details[questionId]) {
+                return null;
+            }
+            
+            const questionDetail = player.question_details[questionId];
+            
+            if (!questionDetail.answered) {
+                return `Question ${questionNumber}: Not answered yet`;
+            }
+            
+            const timeSpent = questionDetail.time_spent_ms ? (questionDetail.time_spent_ms / 1000).toFixed(2) : 'N/A';
+            const status = questionDetail.correct ? 'Correct' : 'Incorrect';
+            const bonus = questionDetail.fastest ? ' (Fastest!)' : '';
+            
+            return `Question ${questionNumber}: ${status}${bonus}\nTime: ${timeSpent}s`;
+        }
+
         // --- UI and Game Logic Functions ---
         async function handleNameSubmission() {
             const name = playerNameInput.value.trim();
@@ -469,7 +712,7 @@
 
             updatePlayerStatus({
                 score: 0,
-                current_question_number: 1,
+                current_question_number: 1, // Starting question 1
                 total_questions_in_game: currentQuestions.length,
                 status: "playing"
             });
@@ -480,6 +723,7 @@
                 endGame();
                 return;
             }
+            questionStartTime = Date.now(); // Record start time for the question
 
             const questionData = currentQuestions[currentQuestionIndex];
             questionTextDisplay.textContent = questionData.question;
@@ -531,9 +775,11 @@
         }
 
         function handleSubmit() {
+            const timeSpentMs = Date.now() - questionStartTime;
             const questionData = currentQuestions[currentQuestionIndex];
             let userAnswer;
             let isCorrect = false;
+            let pointsEarnedThisTurn = 0;
 
             if (questionData.type === 'multiple-choice' || questionData.type === 'true-false') {
                 const selectedButton = optionsContainer.querySelector('.option-btn.selected');
@@ -560,14 +806,15 @@
             }
 
             if (isCorrect) {
-                // Use questionData.points if available, otherwise default to 1
-                score += (questionData.points || 1); 
+                pointsEarnedThisTurn = (questionData.points || 1);
+                score += pointsEarnedThisTurn; 
                 feedbackTitle.textContent = "Correct!";
                 feedbackTitle.className = 'text-2xl font-bold mb-3 text-green-600';
             } else {
                 feedbackTitle.textContent = "Incorrect!";
                 feedbackTitle.className = 'text-2xl font-bold mb-3 text-red-600';
             }
+            
             updateScoreDisplay();
             feedbackText.textContent = questionData.explanation;
             feedbackModal.classList.remove('hidden');
@@ -578,11 +825,15 @@
                  statusUpdate = "finished";
             }
 
+            // Send answer data with question ID as string to match server expectations
             updatePlayerStatus({
                 score: score,
                 current_question_number: nextQNum,
                 status: statusUpdate,
-                total_questions_in_game: currentQuestions.length
+                total_questions_in_game: currentQuestions.length,
+                last_answer_correct: isCorrect,
+                question_id: questionData.id.toString(), // Convert to string to match server
+                time_spent_ms: timeSpentMs
             });
         }
 
@@ -591,14 +842,17 @@
             feedbackModal.classList.add('hidden');
             const progressPercentage = ((currentQuestionIndex) / currentQuestions.length) * 100;
             progressBar.style.width = `${progressPercentage}%`;
-            loadQuestion();
+            loadQuestion(); // This will also set new questionStartTime
 
+            // It might be better to only update status on submit, server handles score.
+            // However, for progress tracking on dashboard, this can be useful.
             if (currentQuestionIndex < currentQuestions.length) {
                  updatePlayerStatus({
-                    score: score, // Score is already updated from handleSubmit
-                    current_question_number: currentQuestionIndex + 1,
+                    score: score, 
+                    current_question_number: currentQuestionIndex + 1, // The question being loaded
                     status: "playing",
                     total_questions_in_game: currentQuestions.length
+                    // Not sending question_id or time_spent here, as it's for a new question
                 });
             }
         }
@@ -612,9 +866,8 @@
             gameScreen.classList.add('hidden');
             endScreen.classList.remove('hidden');
             progressBar.style.width = `100%`;
-            finalScoreDisplay.textContent = `Your final score is: ${score}`; // Total score from accumulated points
+            finalScoreDisplay.textContent = `Your final score is: ${score}`;
             
-            // Summary message can remain the same, or you could adjust thresholds based on total possible points
             let totalPossiblePoints = 0;
             currentQuestions.forEach(q => totalPossiblePoints += (q.points || 1));
 
@@ -627,6 +880,7 @@
             else message = "Keep practicing to improve your knowledge!";
             summaryMessageDisplay.textContent = message;
 
+            // Final status update, score is already current from last handleSubmit
             updatePlayerStatus({
                 score: score,
                 current_question_number: currentQuestions.length,
@@ -661,7 +915,7 @@
             endScreen.classList.add('hidden');
             startScreen.classList.remove('hidden');
             updatePlayerStatus({
-                score: 0, // Reset score for new game
+                score: 0,
                 current_question_number: 0,
                 total_questions_in_game: 0,
                 status: "waiting"
